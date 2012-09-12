@@ -8,8 +8,9 @@ var selectionSquare : GameObject;
 var Spaces = 1;
 static var selectionToggle = false;
 static var selectionLocation = Vector3(0,0,0);
-
+static var chessBoard : ChessBoard;
 function Start () {
+	chessBoard = new ChessBoard();
 }
 
 function Update () {
@@ -58,3 +59,4 @@ function Update () {
 	//print(Mathf.Round(Input.GetAxis("Horizontal")) + "," + Mathf.Round(Input.GetAxis("Vertical")));
 	
 }
+
