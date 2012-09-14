@@ -48,6 +48,7 @@
      <Compile Include="Assets\Scripts\PieceMovement - Copy (2).js" />
      <Compile Include="Assets\Scripts\PieceMovement - Copy (3).js" />
      <Compile Include="Assets\Scripts\PieceMovement - Copy (4).js" />
+     <Compile Include="Assets\Scripts\PieceMovement - Copy (5).js" />
      <Compile Include="Assets\Scripts\PieceMovement - Copy.js" />
      <Compile Include="Assets\Scripts\PieceMovement.js" />
      <Compile Include="Assets\Scripts\SelectionMovement.js" />
