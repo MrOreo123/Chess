@@ -9,10 +9,12 @@ var Spaces = 1;
 static var selectionToggle = false;
 static var sameLocation = false;
 static var selectionLocation = Vector3(0,0,0);
+static var chessBoard : ChessBoard;
 static var selectedGamePiece;
 selectedGamePiece = "";
 
 function Start () {
+	chessBoard = new ChessBoard();
 }
 
 function Update () {
