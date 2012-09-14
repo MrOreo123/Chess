@@ -24,22 +24,33 @@ function Start () {
 function Update () {
 	Location = transform.position;
 	
-	//	1	If another game piece is dropped on top of this piece, then kill this piece.
+	//	0	If another game piece is dropped on top of this piece, then kill this piece.
 	if (SelectionMovement.selectionToggle == false && SelectionMovement.selectedGamePiece != Piece && SelectionMovement.selectedGamePiece != "" && SelectionMovement.selectionLocation == Location) {
 		transform.Translate(0,0,-2);
 		print(Piece + " has been killed.");
 	}
 		
-	//	2	If selection toggle is off, this resets the selectedGamePiece variable to a blank string.
+	//	1	If selection toggle is off, this resets the selectedGamePiece variable to a blank string.
 	if (SelectionMovement.selectionToggle == false) {
 		SelectionMovement.selectedGamePiece = "";
 		//print(/*frame +*/ " Selection off. Active Game Piece is " + SelectionMovement.selectedGamePiece);
+	}
+	
+	//	2	If the toggle is on, but the location doesn't match, then does nothing.
+	if (SelectionMovement.selectionToggle == true && SelectionMovement.selectionLocation != Location) {
+		//print(/*frame + " " +*/ Piece + " doesn't match the selector's location.");
 	}
 	
 	//	3	Checks if toggle is on, location matches, and no other piece has possession, then claims possession
 	if (SelectionMovement.selectionToggle == true && SelectionMovement.selectionLocation == Location && SelectionMovement.selectedGamePiece == "") {
 		SelectionMovement.selectedGamePiece = Piece;
 		//print(/*frame + " " +*/ Piece + " has just been selected.");
+	}
+	
+	//	3.5	Checks if toggle is on, location matches, but another piece has possession, then does nothing
+	if (SelectionMovement.selectionToggle == true && SelectionMovement.selectionLocation == Location && SelectionMovement.selectedGamePiece != Piece) {
+		//SelectionMovement.selectedGamePiece = Piece;
+		//print(/*frame + " " +*/ Piece + " is not the selected piece.");
 	}
 	
 	//	4	Moves the game piece if it occupies the same square as an active selection box and matches the selected game piece name.
