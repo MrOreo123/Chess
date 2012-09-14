@@ -7,54 +7,51 @@ Use arrow keys to move selection square/game piece.
 var selectionSquare : GameObject;
 var Spaces = 1;
 static var selectionToggle = false;
+static var sameLocation = false;
 static var selectionLocation = Vector3(0,0,0);
+static var selectedGamePiece;
+selectedGamePiece = "";
 
 function Start () {
 }
 
 function Update () {
-	//Time.captureFramerate = 5;
 	selectionLocation = transform.position;
 
 	var xMovement = Input.GetAxis("Horizontal");
 	var zMovement = Input.GetAxis("Vertical");
 	
 	//Move selection one square to the right.
-	if (Input.GetButtonUp("Horizontal"))
-	if (xMovement > 0) {
-		xMovement = Mathf.Ceil(xMovement);
+	if (Input.GetButtonUp("Horizontal") && xMovement > 0) {
+		xMovement = Mathf.Ceil(xMovement) * Spaces;
 		transform.Translate(xMovement,0,0);
 	}
 	
 	//Move selection one square to the left.
-	if (Input.GetButtonUp("Horizontal"))
-	if (xMovement < 0) {
-		xMovement = Mathf.Floor(xMovement);
+	if (Input.GetButtonUp("Horizontal") && xMovement < 0) {
+		xMovement = Mathf.Floor(xMovement) * Spaces;
 		transform.Translate(xMovement,0,0);
 	}
 	
 	//Move selection one square forward.
-	if (Input.GetButtonUp("Vertical"))
-	if (zMovement > 0) {
-		zMovement = Mathf.Ceil(zMovement);
+	if (Input.GetButtonUp("Vertical") && zMovement > 0) {
+		zMovement = Mathf.Ceil(zMovement) * Spaces;
 		transform.Translate(0,-zMovement,0);
 	}
 	
 	//Move selection one square back.
-	if (Input.GetButtonUp("Vertical"))
-	if (zMovement < 0) {
-		zMovement = Mathf.Floor(zMovement);
+	if (Input.GetButtonUp("Vertical") && zMovement < 0) {
+		zMovement = Mathf.Floor(zMovement) * Spaces;
 		transform.Translate(0,-zMovement,0);
 	}
 	
 	if (Input.GetButtonUp("Fire1"))	{
-		if (selectionToggle == false)
-			selectionToggle = true;
+		selectionToggle = !selectionToggle;
+		
+		if (selectionToggle == true)
+			transform.localScale.z *= 5;
 		else
-			selectionToggle = false;
+			transform.localScale.z *= 0.2;
 	}
-	
-	//print("Selection Active: " + selectionToggle + "\nSelection Location: " + selectionLocation);
-	//print(Mathf.Round(Input.GetAxis("Horizontal")) + "," + Mathf.Round(Input.GetAxis("Vertical")));
 	
 }
