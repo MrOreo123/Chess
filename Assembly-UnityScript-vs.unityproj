@@ -44,7 +44,7 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\Models\delete\BoardLocations.js" />
+     <Compile Include="Assets\Scripts\ChessBoard.js" />
      <Compile Include="Assets\Scripts\PieceMovement - Copy (2).js" />
      <Compile Include="Assets\Scripts\PieceMovement - Copy (3).js" />
      <Compile Include="Assets\Scripts\PieceMovement - Copy (4).js" />
