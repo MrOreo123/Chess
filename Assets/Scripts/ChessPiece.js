@@ -15,9 +15,21 @@ class ChessPiece {
 		name = chessPieceName;
 	}
 	
-	public function movable(fromX : int, fromY : int, toX : int, toY : int) {
+	/**
+	 * Function to check if a piece is movable from one position to another
+	 */
+	public function movable(fromX : int, fromY : int, toX : int, toY : int, board : ChessPiece[,]) {
 		Debug.Log(name + " Moving...");
 		return true;
+	}
+	
+	/**
+	 * Utility function leveraged by movable to determine if a piece is blocked on its way to
+	 * a Target Destination
+	 */
+	private function isBlocked(fromX : int, fromY : int, toX : int, toY : int, board : ChessPiece[,]) {
+		Debug.Log(name + " Block Check...");
+		return false;
 	}
 	
 	public function getColor() {
@@ -42,11 +54,13 @@ class Pawn extends ChessPiece {
 		moved = false;
 	}
 	
-	public function movable(fromX : int, fromY : int, toX : int, toY : int) {
-		super(fromX, fromY, toX, toY);
+	public function movable(fromX : int, fromY : int, toX : int, toY : int, board : ChessPiece[,]) {
+		super(fromX, fromY, toX, toY, board);
 		
 		var difY : int = toY - fromY;
 		var difX : int = toX - fromX;
+		
+		var targetPiece : ChessPiece = board[toX, toY];
 		
 		var color : int = super.getColor();
 		
@@ -70,10 +84,20 @@ class Pawn extends ChessPiece {
 				return false;
 			}
 		} else {
+		
+			if ((difY == 2 || difY == -2) && (difX != 0)) {
+				Debug.Log("Pawns cannot move two spaces and left or right");
+				return false;
+			}
 			if (difY > 2 || difY < -2) {
 				Debug.Log("Pawns cannot move more than two spaces forward during their initial move");
 				return false;
 			}
+		}
+		
+		if (isBlocked(fromX, fromY, toX, toY, board) {
+				Debug.Log(getName() + " is blocked!");
+				return false;
 		}
 		
 		moved = true;
@@ -89,8 +113,8 @@ class Bishop extends ChessPiece {
 		super(chessColor, "bishop");
 	}
 	
-	public function movable(fromX : int, fromY : int, toX : int, toY : int) {
-		super(fromX, fromY, toX, toY);
+	public function movable(fromX : int, fromY : int, toX : int, toY : int, board : ChessPiece[,]) {
+		super(fromX, fromY, toX, toY, board);
 		
 		var difY : int = Mathf.Abs(toY - fromY);
 		var difX : int = Mathf.Abs(toX - fromX);
@@ -99,7 +123,11 @@ class Bishop extends ChessPiece {
 			Debug.Log("Bishop didn't move the same amount in the 'x' and 'y' directions");
 			return false;
 		}
-				
+		
+		if (isBlocked(fromX, fromY, toX, toY, board) {
+			Debug.Log(getName() + " is blocked!");
+			return false;
+		}		
 		Debug.Log(getName() + " move passed all validations");
 		return true;
 	}
@@ -108,12 +136,15 @@ class Bishop extends ChessPiece {
 
 class Rook extends ChessPiece {
 	
+	private var moved : boolean = false;
+	
 	public function Rook(chessColor : int) {
 		super(chessColor, "rook");
+		moved = false;
 	}
 	
-	public function movable(fromX : int, fromY : int, toX : int, toY : int) {
-		super(fromX, fromY, toX, toY);
+	public function movable(fromX : int, fromY : int, toX : int, toY : int, board : ChessPiece[,]) {
+		super(fromX, fromY, toX, toY, board);
 		
 		var difY : int = Mathf.Abs(toY - fromY);
 		var difX : int = Mathf.Abs(toX - fromX);
@@ -123,6 +154,11 @@ class Rook extends ChessPiece {
 			return false;
 		}
 				
+		if (isBlocked(fromX, fromY, toX, toY, board) {
+			Debug.Log(getName() + " is blocked!");
+			return false;
+		}	
+		moved = true;
 		Debug.Log(getName() + " move passed all validations");
 		return true;
 	}
@@ -135,8 +171,8 @@ class Queen extends ChessPiece {
 		super(chessColor, "queen");
 	}
 	
-	public function movable(fromX : int, fromY : int, toX : int, toY : int) {
-		super(fromX, fromY, toX, toY);
+	public function movable(fromX : int, fromY : int, toX : int, toY : int, board : ChessPiece[,]) {
+		super(fromX, fromY, toX, toY, board);
 		
 		var difY : int = Mathf.Abs(toY - fromY);
 		var difX : int = Mathf.Abs(toX - fromX);
@@ -150,6 +186,11 @@ class Queen extends ChessPiece {
 			}
 		} 
 		
+		if (isBlocked(fromX, fromY, toX, toY, board) {
+			Debug.Log(getName() + " is blocked!");
+			return false;
+		}	
+		
 		Debug.Log(getName() + " move passed all validations");
 		return true;
 	}
@@ -158,12 +199,15 @@ class Queen extends ChessPiece {
 
 class King extends ChessPiece {
 	
+	private var moved : boolean = false;
+	
 	public function King(chessColor : int) {
 		super(chessColor, "king");
+		moved = false;
 	}
 	
-	public function movable(fromX : int, fromY : int, toX : int, toY : int) {
-		super(fromX, fromY, toX, toY);
+	public function movable(fromX : int, fromY : int, toX : int, toY : int, board : ChessPiece[,]) {
+		super(fromX, fromY, toX, toY, board);
 		
 		var difY : int = Mathf.Abs(toY - fromY);
 		var difX : int = Mathf.Abs(toX - fromX);
@@ -172,12 +216,18 @@ class King extends ChessPiece {
 			Debug.Log(getName() + " cannot move more than one space forward");
 			return false;
 		} else if (difX > 1) {
+			// todo Deal with Castleing
 			Debug.Log(getName() + " cannot move more than one space left or right");
 			return false;
 		} 
 		
-		// todo Deal with Castleing
 		
+		if (isBlocked(fromX, fromY, toX, toY, board) {
+			Debug.Log(getName() + " is blocked!");
+			return false;
+		}	
+		
+		moved = true;
 		Debug.Log(getName() + " move passed all validations");
 		return true;
 	}
@@ -190,8 +240,8 @@ class Knight extends ChessPiece {
 		super(chessColor, "knight");
 	}
 	
-	public function movable(fromX : int, fromY : int, toX : int, toY : int) {
-		super(fromX, fromY, toX, toY);
+	public function movable(fromX : int, fromY : int, toX : int, toY : int, board : ChessPiece[,]) {
+		super(fromX, fromY, toX, toY, board);
 		
 		var difY : int = Mathf.Abs(toY - fromY);
 		var difX : int = Mathf.Abs(toX - fromX);
@@ -213,8 +263,8 @@ class Empty extends ChessPiece {
 		super(-1, "empty");
 	}
 	
-	public function movable(fromX : int, fromY : int, toX : int, toY : int) {
-		super(fromX, fromY, toX, toY);
+	public function movable(fromX : int, fromY : int, toX : int, toY : int, board : ChessPiece[,]) {
+		super(fromX, fromY, toX, toY, board);
 		
 		Debug.Log("Empty pieces cannot move");
 		return false;

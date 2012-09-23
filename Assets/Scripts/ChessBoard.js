@@ -2,9 +2,9 @@
 
 class ChessBoard {
 
-var playerAction = 0;
-// playerAction = 0 ==> Whites Move
-// playerAction = 1 ==> Blackes Move
+var playerAction : boolean = true;
+// playerAction = true ==> Whites Move
+// playerAction = false ==> Blackes Move
  
 var board : ChessPiece[,];
 	
@@ -96,9 +96,13 @@ public function ChessBoard() {
 	];
 	*/
 	Debug.Log(board);
-	playerAction = 0;
+	playerAction = true;
 }
 
+/**
+ * Function used to validate a move from selection movement. If it returns
+ * false, then the move was invalid, and selection movement should reset the turn.
+ */
 function validateMove(fromX : int, fromY : int, toX : int, toY : int) {
 	
 	if (!insideBoard(fromX, fromY)) {
@@ -114,14 +118,32 @@ function validateMove(fromX : int, fromY : int, toX : int, toY : int) {
 		Debug.Log("From position is an empty piece");
 		return false;
 	} else {
+		if (playerAction && piece.getColor() != 0) {
+			Debug.Log("White Piece Players can only move white pieces");
+			return false;
+		}
+		if (!playerAction && piece.getColor() != 1) {
+			Debug.Log("Black Piece Players can only move black pieces");
+			return false;
+		}
 		
 		var targetPiece : ChessPiece = board[toX, toY];
 		if (piece.getColor() == targetPiece.getColor()) {
 			Debug.Log("Pieces cannot occupy the same space as another piece of the same color");
 			return false;
+		} else {
+			// special rules for pawns
+			
+			if (piece.getName() === "pawn") {
+				var difX : int = Mathf.Abs(toX - fromX);
+			  	if (difX == 1 && targetPiece.getName() === "empty") {
+			  		Debug.Log("Pawns cannot move left or right unless they are killing something");
+					return false;
+			  	}
+			}
 		}
 		
-		if (!piece.movable(fromX, fromY, toX, toY)) {
+		if (!piece.movable(fromX, fromY, toX, toY, board)) {
 			Debug.Log(piece.getName() + " cannot move from (" 
 			+ fromX + ", " + fromY + ") to ("+ fromX + ", " + fromY + ")");
 			
@@ -132,9 +154,10 @@ function validateMove(fromX : int, fromY : int, toX : int, toY : int) {
 		if (targetPiece.getColor() > -1){
 			targetPiece.die();
 		}
-		
+		board[fromX, fromY] = new Empty();
 		board[toX, toY] = piece;
 		
+		playerAction = !playerAction;
 		return true;
 	}
 
