@@ -7,28 +7,32 @@ var playerAction : boolean = true;
 // playerAction = false ==> Blackes Move
  
 var board : ChessPiece[,];
+
+private static var WHITE : int = 0;
+private static var BLACK : int = 1;
+private static var EMPTY : int = -1;
 	
 public function ChessBoard() {
 	Debug.Log("Initializing Chess Board");
 	
 	board = new ChessPiece[8, 8];
-	board[0, 0] = new Rook(0);
-	board[0, 1] = new Knight(0);
-	board[0, 2] = new Bishop(0);
-	board[0, 3] = new Queen(0);
-	board[0, 4] = new King(0);
-	board[0, 5] = new Bishop(0);
-	board[0, 6] = new Knight(0);
-	board[0, 7] = new Rook(0);
+	board[0, 0] = new Rook(WHITE);
+	board[0, 1] = new Knight(WHITE);
+	board[0, 2] = new Bishop(WHITE);
+	board[0, 3] = new Queen(WHITE);
+	board[0, 4] = new King(WHITE);
+	board[0, 5] = new Bishop(WHITE);
+	board[0, 6] = new Knight(WHITE);
+	board[0, 7] = new Rook(WHITE);
 	
-	board[1, 0] = new Pawn(0);
-	board[1, 1] = new Pawn(0);
-	board[1, 2] = new Pawn(0);
-	board[1, 3] = new Pawn(0);
-	board[1, 4] = new Pawn(0);
-	board[1, 5] = new Pawn(0);
-	board[1, 6] = new Pawn(0);
-	board[1, 7] = new Pawn(0);
+	board[1, 0] = new Pawn(WHITE);
+	board[1, 1] = new Pawn(WHITE);
+	board[1, 2] = new Pawn(WHITE);
+	board[1, 3] = new Pawn(WHITE);
+	board[1, 4] = new Pawn(WHITE);
+	board[1, 5] = new Pawn(WHITE);
+	board[1, 6] = new Pawn(WHITE);
+	board[1, 7] = new Pawn(WHITE);
 	
 	board[2, 0] = new Empty();
 	board[2, 1] = new Empty();
@@ -66,23 +70,23 @@ public function ChessBoard() {
 	board[5, 6] = new Empty();
 	board[5, 7] = new Empty();
 	
-	board[6, 0] = new Pawn(1);
-	board[6, 1] = new Pawn(1);
-	board[6, 2] = new Pawn(1);
-	board[6, 3] = new Pawn(1);
-	board[6, 4] = new Pawn(1);
-	board[6, 5] = new Pawn(1);
-	board[6, 6] = new Pawn(1);
-	board[6, 7] = new Pawn(1);
+	board[6, 0] = new Pawn(BLACK);
+	board[6, 1] = new Pawn(BLACK);
+	board[6, 2] = new Pawn(BLACK);
+	board[6, 3] = new Pawn(BLACK);
+	board[6, 4] = new Pawn(BLACK);
+	board[6, 5] = new Pawn(BLACK);
+	board[6, 6] = new Pawn(BLACK);
+	board[6, 7] = new Pawn(BLACK);
 	
-	board[7, 0] = new Rook(1);
-	board[7, 1] = new Knight(1);
-	board[7, 2] = new Bishop(1);
-	board[7, 3] = new Queen(1);
-	board[7, 4] = new King(1);
-	board[7, 5] = new Bishop(1);
-	board[7, 6] = new Knight(1);
-	board[7, 7] = new Rook(1);
+	board[7, 0] = new Rook(BLACK);
+	board[7, 1] = new Knight(BLACK);
+	board[7, 2] = new Bishop(BLACK);
+	board[7, 3] = new Queen(BLACK);
+	board[7, 4] = new King(BLACK);
+	board[7, 5] = new Bishop(BLACK);
+	board[7, 6] = new Knight(BLACK);
+	board[7, 7] = new Rook(BLACK);
 	
 	/*board = [
 		[wRook, wKnig, wBish, wQuee, wKing, wBish, wKnig, wRook],

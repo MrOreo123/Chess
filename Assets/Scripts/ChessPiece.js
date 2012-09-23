@@ -27,7 +27,7 @@ class ChessPiece {
 	 * Utility function leveraged by movable to determine if a piece is blocked on its way to
 	 * a Target Destination
 	 */
-	private function isBlocked(fromX : int, fromY : int, toX : int, toY : int, board : ChessPiece[,]) {
+	protected function isBlocked(fromX : int, fromY : int, toX : int, toY : int, board : ChessPiece[,]) {
 		Debug.Log(name + " Block Check...");
 		return false;
 	}
@@ -95,7 +95,7 @@ class Pawn extends ChessPiece {
 			}
 		}
 		
-		if (isBlocked(fromX, fromY, toX, toY, board) {
+		if (isBlocked(fromX, fromY, toX, toY, board)) {
 				Debug.Log(getName() + " is blocked!");
 				return false;
 		}
@@ -124,7 +124,7 @@ class Bishop extends ChessPiece {
 			return false;
 		}
 		
-		if (isBlocked(fromX, fromY, toX, toY, board) {
+		if (isBlocked(fromX, fromY, toX, toY, board)) {
 			Debug.Log(getName() + " is blocked!");
 			return false;
 		}		
@@ -154,7 +154,7 @@ class Rook extends ChessPiece {
 			return false;
 		}
 				
-		if (isBlocked(fromX, fromY, toX, toY, board) {
+		if (isBlocked(fromX, fromY, toX, toY, board)) {
 			Debug.Log(getName() + " is blocked!");
 			return false;
 		}	
@@ -186,7 +186,7 @@ class Queen extends ChessPiece {
 			}
 		} 
 		
-		if (isBlocked(fromX, fromY, toX, toY, board) {
+		if (isBlocked(fromX, fromY, toX, toY, board)) {
 			Debug.Log(getName() + " is blocked!");
 			return false;
 		}	
@@ -222,7 +222,7 @@ class King extends ChessPiece {
 		} 
 		
 		
-		if (isBlocked(fromX, fromY, toX, toY, board) {
+		if (isBlocked(fromX, fromY, toX, toY, board)) {
 			Debug.Log(getName() + " is blocked!");
 			return false;
 		}	
