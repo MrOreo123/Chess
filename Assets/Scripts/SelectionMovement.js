@@ -23,6 +23,21 @@ function Update () {
 	var xMovement = Input.GetAxis("Horizontal");
 	var zMovement = Input.GetAxis("Vertical");
 	
+	/*	this chunk of code should be a function that is called 
+	when the player tries to deactivate the selection to place 
+	a piece on the board
+	
+	if (selectionToggle == false) {
+		-script should check if selected piece is movable (not blocked)
+		-call movable function to see if it's a valid move
+			-if true,
+				-location of piece is updated on the chessboard
+				-clear fromX and fromY variables
+			-if false,
+				-make selectionToggle true again, because the move was not valid
+	}
+	*/
+	
 	//Move selection one square to the right.
 	if (Input.GetButtonUp("Horizontal") && xMovement > 0) {
 		xMovement = Mathf.Ceil(xMovement) * Spaces;
@@ -52,8 +67,11 @@ function Update () {
 		
 		if (selectionToggle == true)
 			transform.localScale.z *= 5;
+			//save fromX and fromY location for movability calculations
+			//call movable function to see if the piece is even movable (not blocked from all valid possible moves)
 		else
+			//call selection deactivation function above
 			transform.localScale.z *= 0.2;
 	}
 	
-}
+	}
