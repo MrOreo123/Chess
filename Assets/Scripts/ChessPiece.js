@@ -2,6 +2,9 @@
 
 class ChessPiece {
 	
+	public final static var WHITE : int = 0;
+	public final static var BLACK : int = 1;
+	public final static var EMPTY : int = -1;
 	// color : 0 ==> White
 	// color : 1 ==> Black
 	// color : -1 ==> Empty
@@ -20,16 +23,25 @@ class ChessPiece {
 	 */
 	public function movable(fromX : int, fromY : int, toX : int, toY : int, board : ChessPiece[,]) {
 		Debug.Log(name + " Moving...");
-		return true;
+		return insideBoard(fromX, fromY) && insideBoard(toX, toY);
+	}
+	
+	public function isBlocked(fromX : int, fromY : int, toX : int, toY : int, board : ChessPiece[,]) {
+		Debug.Log(name + " Blocked Check...");
+		return false;
 	}
 	
 	/**
-	 * Utility function leveraged by movable to determine if a piece is blocked on its way to
-	 * a Target Destination
+	 * Utility method used to check if a space is inside the board
 	 */
-	protected function isBlocked(fromX : int, fromY : int, toX : int, toY : int, board : ChessPiece[,]) {
-		Debug.Log(name + " Block Check...");
-		return false;
+	function insideBoard(x : int, y : int) {
+		if (x < 0 || x > 7) {
+			return false;
+		} else if (y < 0 || y > 7) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 	
 	public function getColor() {
@@ -40,9 +52,20 @@ class ChessPiece {
 		return name;
 	}
 	
-	public function die() {
-	
+	/**
+	 * Utility Method to get the color and name of the piece as a String value
+	 */
+	public function toString() {
+		var colorString : String = "EMPTY";
+		if (color == WHITE) {
+			colorString = "WHITE";
+		} 
+		else if (color == BLACK) {
+			colorString = "BLACK";
+		}
+		return "[" + colorString + " " + getName() + "]";
 	}
+	
 }
 
 class Pawn extends ChessPiece {
@@ -55,7 +78,9 @@ class Pawn extends ChessPiece {
 	}
 	
 	public function movable(fromX : int, fromY : int, toX : int, toY : int, board : ChessPiece[,]) {
-		super(fromX, fromY, toX, toY, board);
+		if (!(super.movable(fromX, fromY, toX, toY, board))) {
+			return false;
+		}
 		
 		var difY : int = toY - fromY;
 		var difX : int = toX - fromX;
@@ -114,7 +139,9 @@ class Bishop extends ChessPiece {
 	}
 	
 	public function movable(fromX : int, fromY : int, toX : int, toY : int, board : ChessPiece[,]) {
-		super(fromX, fromY, toX, toY, board);
+		if (!super.movable(fromX, fromY, toX, toY, board)) {
+			return false;
+		}
 		
 		var difY : int = Mathf.Abs(toY - fromY);
 		var difX : int = Mathf.Abs(toX - fromX);
@@ -131,6 +158,39 @@ class Bishop extends ChessPiece {
 		Debug.Log(getName() + " move passed all validations");
 		return true;
 	}
+	
+	public function isBlocked(fromX : int, fromY : int, toX : int, toY : int, board : ChessPiece[,]) {
+		
+		var xDirection : int = 0;
+		var yDirection : int = 0;
+		if (fromX > toX) {
+			xDirection = 1;
+		} else if (fromX < toX) {
+			xDirection = -1;
+		}
+		
+		if (fromY > toY) {
+			yDirection = 1;
+		} else if (fromY < toY) {
+			yDirection = -1;
+		}
+		
+		var xIndex : int;
+		var yIndex : int;
+		var valid : boolean = true;
+		for (xIndex = fromX; xIndex != toX; xIndex = xIndex + xDirection) {
+			for (yIndex = fromY; yIndex != toY; yIndex = yIndex + yDirection) {
+				if (board[xIndex, yIndex].getColor() != EMPTY) {
+				
+					valid = false;
+					break;
+				
+				}
+			}
+		}
+		
+		return valid;
+	}
 
 }
 
@@ -144,7 +204,9 @@ class Rook extends ChessPiece {
 	}
 	
 	public function movable(fromX : int, fromY : int, toX : int, toY : int, board : ChessPiece[,]) {
-		super(fromX, fromY, toX, toY, board);
+		if (!super.movable(fromX, fromY, toX, toY, board)) {
+			return false;
+		}
 		
 		var difY : int = Mathf.Abs(toY - fromY);
 		var difX : int = Mathf.Abs(toX - fromX);
@@ -154,13 +216,46 @@ class Rook extends ChessPiece {
 			return false;
 		}
 				
-		if (isBlocked(fromX, fromY, toX, toY, board)) {
-			Debug.Log(getName() + " is blocked!");
-			return false;
-		}	
+		if (difX == 0) {
+			var yIncrement : int = 0;
+			if (fromY > toY) {
+				yIncrement = 1;
+			} else {
+				yIncrement = -1;
+			}
+			
+			var yIndex : int = 0;
+			for (yIndex = fromY + 1; yIndex != toY; yIndex = yIndex + yIncrement){
+				if (board[fromX, yIndex].getColor() != EMPTY){
+					Debug.Log("Rook is blocked by piece at [" + fromX + ", " + yIndex + "]");
+					return false;
+				}
+			}
+		} 
+		else {
+			var xIncrement : int = 0;
+			if (fromX > toX) {
+				xIncrement = 1;
+			} else {
+				xIncrement = -1;
+			}
+			
+			var xIndex : int = 0;
+			for (xIndex = fromX + 1; xIndex != toX; xIndex = xIndex + xIncrement){
+				if (board[xIndex, fromY].getColor() != EMPTY){
+					Debug.Log("Rook is blocked by piece at [" + xIndex + ", " + fromY + "]");
+					return false;
+				}
+			}
+		}
 		moved = true;
 		Debug.Log(getName() + " move passed all validations");
 		return true;
+	}
+	
+	public function isBlocked(fromX : int, fromY : int, toX : int, toY : int, board : ChessPiece[,]) {
+	
+	
 	}
 
 }
@@ -172,7 +267,9 @@ class Queen extends ChessPiece {
 	}
 	
 	public function movable(fromX : int, fromY : int, toX : int, toY : int, board : ChessPiece[,]) {
-		super(fromX, fromY, toX, toY, board);
+		if (!super.movable(fromX, fromY, toX, toY, board)) {
+			return false;
+		}
 		
 		var difY : int = Mathf.Abs(toY - fromY);
 		var difX : int = Mathf.Abs(toX - fromX);
@@ -207,7 +304,9 @@ class King extends ChessPiece {
 	}
 	
 	public function movable(fromX : int, fromY : int, toX : int, toY : int, board : ChessPiece[,]) {
-		super(fromX, fromY, toX, toY, board);
+		if (!super.movable(fromX, fromY, toX, toY, board)) {
+			return false;
+		}
 		
 		var difY : int = Mathf.Abs(toY - fromY);
 		var difX : int = Mathf.Abs(toX - fromX);
@@ -215,11 +314,13 @@ class King extends ChessPiece {
 		if (difY > 1) {
 			Debug.Log(getName() + " cannot move more than one space forward");
 			return false;
-		} else if (difX > 1) {
-			// todo Deal with Castleing
+		} else if (difX > 1 && moved) {
 			Debug.Log(getName() + " cannot move more than one space left or right");
 			return false;
-		} 
+		} else if (difX > 3 && !moved) {
+			Debug.Log(getName() + " cannot castle");
+			return false;
+		}
 		
 		
 		if (isBlocked(fromX, fromY, toX, toY, board)) {
@@ -234,21 +335,37 @@ class King extends ChessPiece {
 
 }
 
+/**
+ * Class representing a Knight Piece.
+ */
 class Knight extends ChessPiece {
 	
 	public function Knight(chessColor : int) {
 		super(chessColor, "knight");
 	}
 	
+	/**
+	 * Function to determine if the knight piece can move the specific location
+	 */
 	public function movable(fromX : int, fromY : int, toX : int, toY : int, board : ChessPiece[,]) {
-		super(fromX, fromY, toX, toY, board);
+		if (!super.movable(fromX, fromY, toX, toY, board)) {
+			return false;
+		}
 		
 		var difY : int = Mathf.Abs(toY - fromY);
 		var difX : int = Mathf.Abs(toX - fromX);
 		
+		
 		if ((difY == 3 && difX == 1) || (difY == 1 && difX == 3)) {
-			Debug.Log(getName() + " move passed all validations");
-			return true;
+			Debug.Log(getName() + " moved like a knight");
+			var targetPiece : ChessPiece = board[toX, toY];
+			if (this.getColor() == targetPiece.getColor()) {
+				Debug.Log("Piece cannot occupy a space inhabited by the same color");
+				return false;
+			}
+			else {
+				return true;
+			}
 		} else {
 			Debug.Log(getName() + " did not move like a knight");
 			return false;
