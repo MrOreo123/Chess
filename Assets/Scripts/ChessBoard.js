@@ -4,6 +4,8 @@ class ChessBoard {
  
 var board : ChessPiece[,];
 
+var winner : int = 0;
+
 private static final var DIMENSION : int = 8;
 
 // Maintain the positions of the Kings specifically.
@@ -188,7 +190,76 @@ function getPiece(x : int, y : int) {
 }
 
 function canAttack(fromX : int, fromY : int, toX : int, toY : int) {
+	
+	var piece : ChessPiece = board[ fromX, fromY ];
+	
+	// assumes that the piece has already passed all validations in ChessMover.js
+	var difX : int = Mathf.Abs(toX - fromX);
+	var difY : int = Mathf.Abs(toY - fromY);
+	
+	var xIndex : int = fromX;
+	var yIndex : int = fromY;
+	var canAttack : boolean = true;
+	if (difX == 0 && difY != 0) {
+		if (toY > fromY) {
+			for ( ; canAttack && yIndex <= toY ; yIndex++) {
+				canAttack = piece.movable(fromX, fromY, xIndex, yIndex, board);
+			}
+		} 
+		else {
+			for ( ; canAttack && yIndex >= toY ; yIndex--) {
+				canAttack = piece.movable(fromX, fromY, xIndex, yIndex, board);
+			}
+		}
+	}
+	else if (difX != 0 && difY == 0) {
+		if (toX > fromX) {
+			for ( ; canAttack && xIndex <= toX ; xIndex++) {
+				canAttack = piece.movable(fromX, fromY, xIndex, yIndex, board);
+			}
+		} 
+		else {
+			for ( ; canAttack && xIndex >= toX ; xIndex--) {
+				canAttack = piece.movable(fromX, fromY, xIndex, yIndex, board);
+			}
+		}
+	}
+	else if (difX == difY) {
+		var dirX : int = 0;
+		if (toX > fromX) {
+			dirX = 1;
+		} 
+		else if (toX < fromX) {
+			dirX = -1;
+		}
+		
+		var dirY : int = 0;
+		if (toY > fromY) {
+			dirY = 1;
+		} 
+		else if (toY < fromY) {
+			dirY = -1;
+		}
+		
+		for (; canAttack && difX >= 0; difX--) {
+			xIndex = xIndex + difX;
+			yIndex = yIndex + difY;
+			canAttack = piece.movable(fromX, fromY, xIndex, yIndex, board);
+		}
+	}
+	else {
+		canAttack = piece.movable(fromX, fromY, toX, toY, board);
+	}
+	
+	return canAttack;
+}
 
+function setWinner(color : int) {
+	winner = color;
+}
+
+function getWinner() {
+	return winner;
 }
 
 }

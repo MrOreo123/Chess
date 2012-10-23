@@ -26,11 +26,6 @@ class ChessPiece {
 		return insideBoard(fromX, fromY) && insideBoard(toX, toY);
 	}
 	
-	public function isBlocked(fromX : int, fromY : int, toX : int, toY : int, board : ChessPiece[,]) {
-		Debug.Log(name + " Blocked Check...");
-		return false;
-	}
-	
 	/**
 	 * Utility method used to check if a space is inside the board
 	 */
@@ -158,39 +153,6 @@ class Bishop extends ChessPiece {
 		Debug.Log(getName() + " move passed all validations");
 		return true;
 	}
-	
-	public function isBlocked(fromX : int, fromY : int, toX : int, toY : int, board : ChessPiece[,]) {
-		
-		var xDirection : int = 0;
-		var yDirection : int = 0;
-		if (fromX > toX) {
-			xDirection = 1;
-		} else if (fromX < toX) {
-			xDirection = -1;
-		}
-		
-		if (fromY > toY) {
-			yDirection = 1;
-		} else if (fromY < toY) {
-			yDirection = -1;
-		}
-		
-		var xIndex : int;
-		var yIndex : int;
-		var valid : boolean = true;
-		for (xIndex = fromX; xIndex != toX; xIndex = xIndex + xDirection) {
-			for (yIndex = fromY; yIndex != toY; yIndex = yIndex + yDirection) {
-				if (board[xIndex, yIndex].getColor() != EMPTY) {
-				
-					valid = false;
-					break;
-				
-				}
-			}
-		}
-		
-		return valid;
-	}
 
 }
 
@@ -252,12 +214,6 @@ class Rook extends ChessPiece {
 		Debug.Log(getName() + " move passed all validations");
 		return true;
 	}
-	
-	public function isBlocked(fromX : int, fromY : int, toX : int, toY : int, board : ChessPiece[,]) {
-	
-	
-	}
-
 }
 
 class Queen extends ChessPiece {
