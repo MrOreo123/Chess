@@ -2,12 +2,17 @@
 
 class ChessPiece {
 	
+	public final static var WHITE : int = 0;
+	public final static var BLACK : int = 1;
+	public final static var EMPTY : int = -1;
 	// color : 0 ==> White
 	// color : 1 ==> Black
 	// color : -1 ==> Empty
 	private var color : int;
 	
 	private var name : String;
+	
+	private var alreadyMoved : boolean = false;
 	
 	public function ChessPiece(chessColor : int, chessPieceName : String) {
 		Debug.Log("Creating " + ((chessColor == 0) ? "White " : "Black ") + chessPieceName);
@@ -18,18 +23,22 @@ class ChessPiece {
 	/**
 	 * Function to check if a piece is movable from one position to another
 	 */
-	public function movable(fromX : int, fromY : int, toX : int, toY : int, board : ChessPiece[,]) {
+	public function movable(fromX : int, fromY : int, toX : int, toY : int, board : ChessBoard, playerAction : boolean) {
 		Debug.Log(name + " Moving...");
-		return true;
+		return insideBoard(fromX, fromY) && insideBoard(toX, toY);
 	}
 	
 	/**
-	 * Utility function leveraged by movable to determine if a piece is blocked on its way to
-	 * a Target Destination
+	 * Utility method used to check if a space is inside the board
 	 */
-	protected function isBlocked(fromX : int, fromY : int, toX : int, toY : int, board : ChessPiece[,]) {
-		Debug.Log(name + " Block Check...");
-		return false;
+	function insideBoard(x : int, y : int) {
+		if (x < 0 || x > 7) {
+			return false;
+		} else if (y < 0 || y > 7) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 	
 	public function getColor() {
@@ -40,67 +49,112 @@ class ChessPiece {
 		return name;
 	}
 	
-	public function die() {
-	
+	public function hasMoved() {
+		return alreadyMoved;
 	}
+	
+	public function setHasMoved(moved : boolean) {
+		alreadyMoved = moved;
+	}
+	
+	function checkedWhiteKing(board : ChessBoard) {
+		// TODO implement
+		return false;
+	}
+	
+	function checkedBlackKing(board : ChessBoard) {
+		return false;
+	}
+	
+	/**
+	 * Utility Method to get the color and name of the piece as a String value
+	 */
+	public function toString() {
+		var colorString : String = "EMPTY";
+		if (color == WHITE) {
+			colorString = "WHITE";
+		} 
+		else if (color == BLACK) {
+			colorString = "BLACK";
+		}
+		return "[" + colorString + " " + getName() + "]";
+	}
+	
 }
 
 class Pawn extends ChessPiece {
 	
-	private var moved : boolean = false;
-	
 	public function Pawn(chessColor : int) {
 		super(chessColor, "pawn");
-		moved = false;
 	}
 	
-	public function movable(fromX : int, fromY : int, toX : int, toY : int, board : ChessPiece[,]) {
-		super(fromX, fromY, toX, toY, board);
-		
-		var difY : int = toY - fromY;
-		var difX : int = toX - fromX;
-		
-		var targetPiece : ChessPiece = board[toX, toY];
-		
-		var color : int = super.getColor();
-		
-		if ((color == 0) || (difY < 0)) {
-			Debug.Log("White pawns cannot move back to the white side!");
-			return false;
-		} else if ((color == 1) || (difY > 0)) {
-			Debug.Log("Black pawns cannot move back to the black side!");
+	public function movable(fromX : int, fromY : int, toX : int, toY : int, board : ChessBoard, playerAction : boolean) {
+		if (!(super.movable(fromX, fromY, toX, toY, board, playerAction))) {
 			return false;
 		}
 		
-		if (difX > 1 || difX < -1) {
-			Debug.Log("Pawns cannot move left or right more than one space");
+		var yDirection : int = toY - fromY;
+		var xDirection : int = toX - fromX;
+		
+		 // white
+		if (playerAction && yDirection < 0) {
+			Debug.Log(toString() + " can not move backwards");
+			return false;
+		}
+		// black pieces
+		else if (!playerAction && yDirection > 0) {
+			Debug.Log(toString() + " can not move backwards");
 			return false;
 		}
 		
+		if (Mathf.Abs(yDirection) < 1){
+			Debug.Log(toString() + " must always move forward by atleast one square");
+			return false;
+		}
 		
-		if (moved) {
-			if (difY > 1 || difY < -1) {
-				Debug.Log("Pawns cannot move more than one space forward after their initial move");
-				return false;
-			}
-		} else {
+		var target : ChessPiece = board.getPiece(toX, toY);
+		if (playerAction && target.getColor() == ChessPiece.WHITE) {
+			Debug.Log(toString() + " can not move over a piece of the same color");
+			return false;
+		}
+		else if (!playerAction && target.getColor() == ChessPiece.BLACK) {
+			Debug.Log(toString() + " can not move over a piece of the same color");
+			return false;
+		}
 		
-			if ((difY == 2 || difY == -2) && (difX != 0)) {
-				Debug.Log("Pawns cannot move two spaces and left or right");
-				return false;
+		if (xDirection > 1 || xDirection < -1) {
+			Debug.Log(toString() + " can not move left or right more than one space");
+			return false;
+		}
+		else if (Mathf.Abs(xDirection) == 1) {
+			if (playerAction && target.getColor() != ChessPiece.BLACK) {
+				Debug.Log(toString() + " can not move left or right without killing something");
+				return false;	
 			}
-			if (difY > 2 || difY < -2) {
-				Debug.Log("Pawns cannot move more than two spaces forward during their initial move");
+			else if (!playerAction && target.getColor() != ChessPiece.WHITE) {
+				Debug.Log(toString() + " can not move left or right without killing something");
 				return false;
 			}
 		}
-		
-		if (isBlocked(fromX, fromY, toX, toY, board)) {
-				Debug.Log(getName() + " is blocked!");
-				return false;
+		else if (xDirection == 0 && Mathf.Abs(yDirection) > 0) {
+			if (target.getColor() != ChessPiece.EMPTY) {
+				Debug.Log(toString() + " can not move forward into a space that is already occupied");
+				return false;	
+			}
 		}
 		
-		moved = true;
+		// update the state of the board
+		board.move(fromX, fromY, toX, toY);
+		
+		if (playerAction && checkedWhiteKing(board)) {
+			Debug.Log(toString() + " can not move so that board would be in check");
+			return false;	
+		}
+		else if (!playerAction && checkedBlackKing(board)) {
+			Debug.Log(toString() + " can not move so that board would be in check");
+			return false;	
+		}
+		
 		Debug.Log(getName() + " move passed all validations");
 		return true;
 	}
@@ -113,56 +167,26 @@ class Bishop extends ChessPiece {
 		super(chessColor, "bishop");
 	}
 	
-	public function movable(fromX : int, fromY : int, toX : int, toY : int, board : ChessPiece[,]) {
-		super(fromX, fromY, toX, toY, board);
+	public function movable(fromX : int, fromY : int, toX : int, toY : int, board : ChessBoard, playerAction : boolean) {
 		
-		var difY : int = Mathf.Abs(toY - fromY);
-		var difX : int = Mathf.Abs(toX - fromX);
-		
-		if (difX != difY) {
-			Debug.Log("Bishop didn't move the same amount in the 'x' and 'y' directions");
-			return false;
-		}
-		
-		if (isBlocked(fromX, fromY, toX, toY, board)) {
-			Debug.Log(getName() + " is blocked!");
-			return false;
-		}		
-		Debug.Log(getName() + " move passed all validations");
 		return true;
 	}
 
 }
 
 class Rook extends ChessPiece {
-	
-	private var moved : boolean = false;
-	
 	public function Rook(chessColor : int) {
 		super(chessColor, "rook");
-		moved = false;
 	}
 	
-	public function movable(fromX : int, fromY : int, toX : int, toY : int, board : ChessPiece[,]) {
-		super(fromX, fromY, toX, toY, board);
-		
-		var difY : int = Mathf.Abs(toY - fromY);
-		var difX : int = Mathf.Abs(toX - fromX);
-		
-		if (difX != 0 && difY != 0) {
-			Debug.Log("Rook cannot move in two directions");
+	public function movable(fromX : int, fromY : int, toX : int, toY : int, board : ChessBoard, playerAction : boolean) {
+		if (!super.movable(fromX, fromY, toX, toY, board, playerAction)) {
 			return false;
 		}
-				
-		if (isBlocked(fromX, fromY, toX, toY, board)) {
-			Debug.Log(getName() + " is blocked!");
-			return false;
-		}	
-		moved = true;
+		
 		Debug.Log(getName() + " move passed all validations");
 		return true;
 	}
-
 }
 
 class Queen extends ChessPiece {
@@ -171,25 +195,11 @@ class Queen extends ChessPiece {
 		super(chessColor, "queen");
 	}
 	
-	public function movable(fromX : int, fromY : int, toX : int, toY : int, board : ChessPiece[,]) {
-		super(fromX, fromY, toX, toY, board);
-		
-		var difY : int = Mathf.Abs(toY - fromY);
-		var difX : int = Mathf.Abs(toX - fromX);
-		
-		if (difX != difY) {
-			Debug.Log("Queen did not move in the diagonal");
-			
-			if (difX != 0 && difY != 0) {
-				Debug.Log("Queen cannot move in two directions");
-				return false;
-			}
-		} 
-		
-		if (isBlocked(fromX, fromY, toX, toY, board)) {
-			Debug.Log(getName() + " is blocked!");
+	public function movable(fromX : int, fromY : int, toX : int, toY : int, board : ChessBoard, playerAction : boolean) {
+		if (!super.movable(fromX, fromY, toX, toY, board, playerAction)) {
 			return false;
-		}	
+		}
+		
 		
 		Debug.Log(getName() + " move passed all validations");
 		return true;
@@ -199,60 +209,39 @@ class Queen extends ChessPiece {
 
 class King extends ChessPiece {
 	
-	private var moved : boolean = false;
-	
 	public function King(chessColor : int) {
 		super(chessColor, "king");
-		moved = false;
 	}
 	
-	public function movable(fromX : int, fromY : int, toX : int, toY : int, board : ChessPiece[,]) {
-		super(fromX, fromY, toX, toY, board);
-		
-		var difY : int = Mathf.Abs(toY - fromY);
-		var difX : int = Mathf.Abs(toX - fromX);
-		
-		if (difY > 1) {
-			Debug.Log(getName() + " cannot move more than one space forward");
+	public function movable(fromX : int, fromY : int, toX : int, toY : int, board : ChessBoard, playerAction : boolean) {
+		if (!super.movable(fromX, fromY, toX, toY, board, playerAction)) {
 			return false;
-		} else if (difX > 1) {
-			// todo Deal with Castleing
-			Debug.Log(getName() + " cannot move more than one space left or right");
-			return false;
-		} 
+		}
 		
-		
-		if (isBlocked(fromX, fromY, toX, toY, board)) {
-			Debug.Log(getName() + " is blocked!");
-			return false;
-		}	
-		
-		moved = true;
 		Debug.Log(getName() + " move passed all validations");
 		return true;
 	}
 
 }
 
+/**
+ * Class representing a Knight Piece.
+ */
 class Knight extends ChessPiece {
 	
 	public function Knight(chessColor : int) {
 		super(chessColor, "knight");
 	}
 	
-	public function movable(fromX : int, fromY : int, toX : int, toY : int, board : ChessPiece[,]) {
-		super(fromX, fromY, toX, toY, board);
-		
-		var difY : int = Mathf.Abs(toY - fromY);
-		var difX : int = Mathf.Abs(toX - fromX);
-		
-		if ((difY == 3 && difX == 1) || (difY == 1 && difX == 3)) {
-			Debug.Log(getName() + " move passed all validations");
-			return true;
-		} else {
-			Debug.Log(getName() + " did not move like a knight");
+	/**
+	 * Function to determine if the knight piece can move the specific location
+	 */
+	public function movable(fromX : int, fromY : int, toX : int, toY : int, board : ChessBoard, playerAction : boolean) {
+		if (!super.movable(fromX, fromY, toX, toY, board, playerAction)) {
 			return false;
 		}
+		
+		return true;
 	}
 
 }
@@ -263,8 +252,8 @@ class Empty extends ChessPiece {
 		super(-1, "empty");
 	}
 	
-	public function movable(fromX : int, fromY : int, toX : int, toY : int, board : ChessPiece[,]) {
-		super(fromX, fromY, toX, toY, board);
+	public function movable(fromX : int, fromY : int, toX : int, toY : int, board : ChessBoard, playerAction : boolean) {
+		super(fromX, fromY, toX, toY, board, playerAction);
 		
 		Debug.Log("Empty pieces cannot move");
 		return false;

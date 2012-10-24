@@ -1,21 +1,29 @@
 #pragma strict
 
 class ChessBoard {
-
-var playerAction : boolean = true;
-// playerAction = true ==> Whites Move
-// playerAction = false ==> Blackes Move
  
 var board : ChessPiece[,];
 
-private static var WHITE : int = 0;
-private static var BLACK : int = 1;
-private static var EMPTY : int = -1;
+var winner : int = 0;
+
+private static final var DIMENSION : int = 8;
+
+// Maintain the positions of the Kings specifically.
+// to be used when checking for checked or check mated. 
+var whiteKingX : int;
+var whiteKingY : int;
+
+var blackKingX : int;
+var blackKingY : int;
 	
 public function ChessBoard() {
+	
+	var WHITE : int = ChessPiece.WHITE;
+	var BLACK : int = ChessPiece.BLACK;
+
 	Debug.Log("Initializing Chess Board");
 	
-	board = new ChessPiece[8, 8];
+	board = new ChessPiece[DIMENSION, DIMENSION];
 	board[0, 0] = new Rook(WHITE);
 	board[0, 1] = new Knight(WHITE);
 	board[0, 2] = new Bishop(WHITE);
@@ -24,6 +32,9 @@ public function ChessBoard() {
 	board[0, 5] = new Bishop(WHITE);
 	board[0, 6] = new Knight(WHITE);
 	board[0, 7] = new Rook(WHITE);
+	
+	whiteKingX = 0;
+	whiteKingY = 4;
 	
 	board[1, 0] = new Pawn(WHITE);
 	board[1, 1] = new Pawn(WHITE);
@@ -88,6 +99,9 @@ public function ChessBoard() {
 	board[7, 6] = new Knight(BLACK);
 	board[7, 7] = new Rook(BLACK);
 	
+	blackKingX = 7;
+	blackKingY = 4;
+	
 	/*board = [
 		[wRook, wKnig, wBish, wQuee, wKing, wBish, wKnig, wRook],
 		[wPawn, wPawn, wPawn, wPawn, wPawn, wPawn, wPawn, wPawn],
@@ -100,89 +114,54 @@ public function ChessBoard() {
 	];
 	*/
 	Debug.Log(board);
-	playerAction = true;
 }
 
 /**
- * Function used to validate a move from selection movement. If it returns
- * false, then the move was invalid, and selection movement should reset the turn.
+ * Function that will actually move a piece on the board
+ * It puts an Empty object in the from position after moving the from piece to the target position
  */
-function validateMove(fromX : int, fromY : int, toX : int, toY : int) {
+function move(fromX : int, fromY : int, toX : int, toY : int) {
+	var from : ChessPiece = board[fromX, fromY];
+	var to : ChessPiece = board[toX, toY];
 	
-	if (!insideBoard(fromX, fromY)) {
-		Debug.Log("From position not inside board");
-		return false;
-	} else if (!insideBoard(toX, toY)) {
-		Debug.Log("To position is not inside board");
-		return false;
-	}
+	// the chessboard is only concerned with the position of pieces
+	// the validity of the move is handled by the Chess Mover
+	// and the individual pieces
 	
-	var piece : ChessPiece = board[fromX, fromY];
-	if (piece.getName() === "empty") {
-		Debug.Log("From position is an empty piece");
-		return false;
-	} else {
-		if (playerAction && piece.getColor() != 0) {
-			Debug.Log("White Piece Players can only move white pieces");
-			return false;
-		}
-		if (!playerAction && piece.getColor() != 1) {
-			Debug.Log("Black Piece Players can only move black pieces");
-			return false;
-		}
-		
-		var targetPiece : ChessPiece = board[toX, toY];
-		if (piece.getColor() == targetPiece.getColor()) {
-			Debug.Log("Pieces cannot occupy the same space as another piece of the same color");
-			return false;
-		} else {
-			// special rules for pawns
-			
-			if (piece.getName() === "pawn") {
-				var difX : int = Mathf.Abs(toX - fromX);
-			  	if (difX == 1 && targetPiece.getName() === "empty") {
-			  		Debug.Log("Pawns cannot move left or right unless they are killing something");
-					return false;
-			  	}
-			}
-		}
-		
-		if (!piece.movable(fromX, fromY, toX, toY, board)) {
-			Debug.Log(piece.getName() + " cannot move from (" 
-			+ fromX + ", " + fromY + ") to ("+ fromX + ", " + fromY + ")");
-			
-			return false;
-		} 
-		// todo deal with pieces in the way...
-		
-		if (targetPiece.getColor() > -1){
-			targetPiece.die();
-		}
-		board[fromX, fromY] = new Empty();
-		board[toX, toY] = piece;
-		
-		playerAction = !playerAction;
-		return true;
-	}
+	Debug.Log("Moving " + from.toString() + " to the space that is ocuppied by " + to.toString());
+	Debug.Log("-- (" + fromX + ", " + fromY + ") --> (" + toX + ", " + toY + ")");
+	board[fromX, fromY] = new Empty();
+	board[toX, toY] = from;
+	
+}
 
+function setPosition(x : int, y : int, piece : ChessPiece) {
+	board[x, y] = piece;
+}
+
+function setWhiteKingPosition(x : int, y : int) {
+	whiteKingX = x;
+	whiteKingY = y;
+}
+
+function setBlackKingPosition(x : int, y : int) {
+	blackKingX = x;
+	blackKingY = y;
 }
 
 /**
- * Utility method used to check if a space is inside the board
+ * Utility method to get a piece at a specific position on the board
  */
-function insideBoard(x : int, y : int) {
-	if (x < 0 || x > 7) {
-		return false;
-	} else if (y < 0 || y > 7) {
-		return false;
-	} else {
-		return true;
-	}
+function getPiece(x : int, y : int) {
+	return board[x, y];
 }
 
-function checkedKing() {
-	// TODO implement
-	return false;
+function setWinner(color : int) {
+	winner = color;
+}
+
+function getWinner() {
+	return winner;
 }
 
 }
