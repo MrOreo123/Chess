@@ -331,12 +331,48 @@ class Knight extends ChessPiece {
 	 * Function to determine if the knight piece can move the specific location
 	 */
 	public function movable(fromX : int, fromY : int, toX : int, toY : int, board : ChessBoard, playerAction : boolean) {
-		if (!super.movable(fromX, fromY, toX, toY, board, playerAction)) {
+		if (!(super.movable(fromX, fromY, toX, toY, board, playerAction))) {
 			return false;
 		}
 		
+		var yDirection : int = toY - fromY;
+		var xDirection : int = toX - fromX;
+		
+		if (Mathf.Abs(yDirection) = 2 && Mathf.Abs(xDirection) != 1) {
+			Debug.Log(toString() + " must move only one space left or right after moving 2 spaces forward or backward");
+			return false;
+		}
+		if (Mathf.Abs(xDirection) = 2 && Mathf.Abs(yDirection) != 1) {
+			Debug.Log(toString() + " must move only one space forward or backward after moving 2 spaces left or right");
+			return false;
+		}
+		
+		var target : ChessPiece = board.getPiece(toX, toY);
+		if (playerAction && target.getColor() == ChessPiece.WHITE) {
+			Debug.Log(toString() + " can not move over a piece of the same color");
+			return false;
+		}
+		else if (!playerAction && target.getColor() == ChessPiece.BLACK) {
+			Debug.Log(toString() + " can not move over a piece of the same color");
+			return false;
+		}
+		
+		// update the state of the board
+		board.move(fromX, fromY, toX, toY);
+		
+		if (playerAction && checkedWhiteKing(board)) {
+			Debug.Log(toString() + " can not move so that board would be in check");
+			return false;	
+		}
+		else if (!playerAction && checkedBlackKing(board)) {
+			Debug.Log(toString() + " can not move so that board would be in check");
+			return false;	
+		}
+		
+		Debug.Log(getName() + " move passed all validations");
 		return true;
 	}
+
 
 }
 
