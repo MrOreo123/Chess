@@ -54,7 +54,11 @@ function matedBlackKing(board : ChessBoard){
 function canAttack(fromX : int, fromY : int, toX : int, toY : int, board : ChessBoard) {
 	
 	var piece : ChessPiece = board.getPiece( fromX, fromY );
+	var toPiece : ChessPiece = board.getPiece( toX, toY );
 
+	// the piece did not kill anything during this move
+	piece.setKilledSomething(false);
+	
 	// assumes that the piece has already passed all validations in ChessMover.js
 	var difX : int = Mathf.Abs(toX - fromX);
 	var difY : int = Mathf.Abs(toY - fromY);
@@ -70,11 +74,11 @@ function canAttack(fromX : int, fromY : int, toX : int, toY : int, board : Chess
 		if (piece.getName() == "pawn") {
 			if (difY > 1 && piece.hasMoved()) {
 				Debug.Log("-- -- Pawns cannot move forward more that one piece more than once");
-				return false;
+				canAttack = false;
 			}
 			else if (difY > 2 && !piece.hasMoved()) {
 				Debug.Log("-- -- Pawns cannot move forward more than two pieces");
-				return false;
+				canAttack = false;
 			}
 		}
 		if (toY > fromY) {
@@ -82,6 +86,10 @@ function canAttack(fromX : int, fromY : int, toX : int, toY : int, board : Chess
 				canAttack = piece.movable(xIndexOld, yIndexOld, xIndex, yIndex, board, playerAction);
 				xIndexOld = xIndex;
 				yIndexOld = yIndex;
+				if (piece.hasKilledSomething() && xIndex != toX && yIndex != toY){
+					Debug.Log("-- -- pieces cannot move beyond opposing pieces");
+					canAttack = false;
+				}
 			}
 		} 
 		else {
@@ -89,6 +97,10 @@ function canAttack(fromX : int, fromY : int, toX : int, toY : int, board : Chess
 				canAttack = piece.movable(xIndexOld, yIndexOld, xIndex, yIndex, board, playerAction);
 				xIndexOld = xIndex;
 				yIndexOld = yIndex;
+				if (piece.hasKilledSomething() && xIndex != toX && yIndex != toY){
+					Debug.Log("-- -- pieces cannot move beyond opposing pieces");
+					canAttack = false;
+				}
 			}
 		}
 	}
@@ -98,6 +110,10 @@ function canAttack(fromX : int, fromY : int, toX : int, toY : int, board : Chess
 				canAttack = piece.movable(xIndexOld, yIndexOld, xIndex, yIndex, board, playerAction);
 				xIndexOld = xIndex;
 				yIndexOld = yIndex;
+				if (piece.hasKilledSomething() && xIndex != toX && yIndex != toY){
+					Debug.Log("-- -- pieces cannot move beyond opposing pieces");
+					canAttack = false;
+				}
 			}
 		} 
 		else {
@@ -105,6 +121,10 @@ function canAttack(fromX : int, fromY : int, toX : int, toY : int, board : Chess
 				canAttack = piece.movable(xIndexOld, yIndexOld, xIndex, yIndex, board, playerAction);
 				xIndexOld = xIndex;
 				yIndexOld = yIndex;
+				if (piece.hasKilledSomething() && xIndex != toX && yIndex != toY){
+					Debug.Log("-- -- pieces cannot move beyond opposing pieces");
+					canAttack = false;
+				}
 			}
 		}
 	}
@@ -140,6 +160,10 @@ function canAttack(fromX : int, fromY : int, toX : int, toY : int, board : Chess
 			canAttack = piece.movable(xIndexOld, yIndexOld, xIndex, yIndex, board, playerAction);
 			xIndexOld = xIndex;
 			yIndexOld = yIndex;
+			if (piece.hasKilledSomething() && xIndex != toX && yIndex != toY){
+				Debug.Log("-- -- pieces cannot move beyond opposing pieces");
+				canAttack = false;
+			}
 		}
 	}
 	else {
@@ -152,6 +176,7 @@ function canAttack(fromX : int, fromY : int, toX : int, toY : int, board : Chess
 	
 	if (!canAttack) {
 		board.setPosition(fromX, fromY, piece);
+		board.setPosition(toX, toY, toPiece);
 	}
 	else {
 		piece.setHasMoved(true);
