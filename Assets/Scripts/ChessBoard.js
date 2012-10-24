@@ -117,43 +117,6 @@ public function ChessBoard() {
 }
 
 /**
- * Function used to validate a move from selection movement. If it returns
- * false, then the move was invalid, and selection movement should reset the turn.
- *
-function validateMove(fromX : int, fromY : int, toX : int, toY : int) {
-	
-	var piece : ChessPiece = board[fromX, fromY];
-	if (piece.getColor() == EMPTY) {
-		Debug.Log("From position is an empty piece");
-		return false;
-	} else {
-		if (playerAction && piece.getColor() != 0) {
-			Debug.Log("White Piece Players can only move white pieces");
-			return false;
-		}
-		if (!playerAction && piece.getColor() != 1) {
-			Debug.Log("Black Piece Players can only move black pieces");
-			return false;
-		}		
-		
-		if (!piece.movable(fromX, fromY, toX, toY, board)) {
-			Debug.Log(piece.getName() + " cannot move from (" 
-			+ fromX + ", " + fromY + ") to ("+ fromX + ", " + fromY + ")");
-			
-			return false;
-		} 
-		
-		board[fromX, fromY] = new Empty();
-		board[toX, toY] = piece;
-		
-		playerAction = !playerAction;
-		return true;
-	}
-
-}
-*/
-
-/**
  * Function that will actually move a piece on the board
  * It puts an Empty object in the from position after moving the from piece to the target position
  */
@@ -172,6 +135,10 @@ function move(fromX : int, fromY : int, toX : int, toY : int) {
 	
 }
 
+function setPosition(x : int, y : int, piece : ChessPiece) {
+	board[x, y] = piece;
+}
+
 function setWhiteKingPosition(x : int, y : int) {
 	whiteKingX = x;
 	whiteKingY = y;
@@ -187,71 +154,6 @@ function setBlackKingPosition(x : int, y : int) {
  */
 function getPiece(x : int, y : int) {
 	return board[x, y];
-}
-
-function canAttack(fromX : int, fromY : int, toX : int, toY : int) {
-	
-	var piece : ChessPiece = board[ fromX, fromY ];
-	
-	// assumes that the piece has already passed all validations in ChessMover.js
-	var difX : int = Mathf.Abs(toX - fromX);
-	var difY : int = Mathf.Abs(toY - fromY);
-	
-	var xIndex : int = fromX;
-	var yIndex : int = fromY;
-	var canAttack : boolean = true;
-	if (difX == 0 && difY != 0) {
-		if (toY > fromY) {
-			for ( ; canAttack && yIndex <= toY ; yIndex++) {
-				canAttack = piece.movable(fromX, fromY, xIndex, yIndex, board);
-			}
-		} 
-		else {
-			for ( ; canAttack && yIndex >= toY ; yIndex--) {
-				canAttack = piece.movable(fromX, fromY, xIndex, yIndex, board);
-			}
-		}
-	}
-	else if (difX != 0 && difY == 0) {
-		if (toX > fromX) {
-			for ( ; canAttack && xIndex <= toX ; xIndex++) {
-				canAttack = piece.movable(fromX, fromY, xIndex, yIndex, board);
-			}
-		} 
-		else {
-			for ( ; canAttack && xIndex >= toX ; xIndex--) {
-				canAttack = piece.movable(fromX, fromY, xIndex, yIndex, board);
-			}
-		}
-	}
-	else if (difX == difY) {
-		var dirX : int = 0;
-		if (toX > fromX) {
-			dirX = 1;
-		} 
-		else if (toX < fromX) {
-			dirX = -1;
-		}
-		
-		var dirY : int = 0;
-		if (toY > fromY) {
-			dirY = 1;
-		} 
-		else if (toY < fromY) {
-			dirY = -1;
-		}
-		
-		for (; canAttack && difX >= 0; difX--) {
-			xIndex = xIndex + difX;
-			yIndex = yIndex + difY;
-			canAttack = piece.movable(fromX, fromY, xIndex, yIndex, board);
-		}
-	}
-	else {
-		canAttack = piece.movable(fromX, fromY, toX, toY, board);
-	}
-	
-	return canAttack;
 }
 
 function setWinner(color : int) {

@@ -25,24 +25,12 @@ function canMove(fromX : int, fromY : int, toX : int, toY : int, board : ChessBo
 	
 	// need to check if from piece can move to the target position
 	// -- check if the piece is blocked in the course of moving
-	if (!board.canAttack(fromX, fromY, toX, toY)) {
+	if (!canAttack(fromX, fromY, toX, toY, board)) {
 		Debug.Log("-- Chess Board Does not allow move");
 		return false;
-	}
-	
-	// check if the player would be checked by making the move
-	if (playerAction && checkedWhiteKing(board, fromX, fromY)){
-		Debug.Log("-- White would be checked if move was made...");
-		return false;
-	}
-	else if (!playerAction && checkedBlackKing(board, fromX, fromY)){
-		Debug.Log("-- Black would be checked if move was made...");
-		return false;
-	}
-	
+	}	
 	
 	Debug.Log("-- Move passed all rules to Chess!");
-	board.move(fromX, fromY, toX, toY);
 	
 	return true;
 
@@ -70,4 +58,91 @@ function matedWhiteKing(board : ChessBoard){
 
 function matedBlackKing(board : ChessBoard){
 	return false;
+}
+
+function canAttack(fromX : int, fromY : int, toX : int, toY : int, board : ChessBoard) {
+	
+	var piece : ChessPiece = board.getPiece( fromX, fromY );
+
+	// assumes that the piece has already passed all validations in ChessMover.js
+	var difX : int = Mathf.Abs(toX - fromX);
+	var difY : int = Mathf.Abs(toY - fromY);
+	
+	var xIndex : int = fromX;
+	var yIndex : int = fromY;
+	
+	var xIndexOld : int = fromX;
+	var yIndexOld : int = fromY;
+	
+	var canAttack : boolean = true;
+	if (difX == 0 && difY != 0) {
+		if (toY > fromY) {
+			for ( ; canAttack && yIndex <= toY ; yIndex++) {
+				canAttack = piece.movable(xIndexOld, yIndexOld, xIndex, yIndex, board, playerAction);
+				xIndexOld = xIndex;
+				yIndexOld = yIndex;
+			}
+		} 
+		else {
+			for ( ; canAttack && yIndex >= toY ; yIndex--) {
+				canAttack = piece.movable(xIndexOld, yIndexOld, xIndex, yIndex, board, playerAction);
+				xIndexOld = xIndex;
+				yIndexOld = yIndex;
+			}
+		}
+	}
+	else if (difX != 0 && difY == 0) {
+		if (toX > fromX) {
+			for ( ; canAttack && xIndex <= toX ; xIndex++) {
+				canAttack = piece.movable(xIndexOld, yIndexOld, xIndex, yIndex, board, playerAction);
+				xIndexOld = xIndex;
+				yIndexOld = yIndex;
+			}
+		} 
+		else {
+			for ( ; canAttack && xIndex >= toX ; xIndex--) {
+				canAttack = piece.movable(xIndexOld, yIndexOld, xIndex, yIndex, board, playerAction);
+				xIndexOld = xIndex;
+				yIndexOld = yIndex;
+			}
+		}
+	}
+	else if (difX == difY) {
+		var dirX : int = 0;
+		if (toX > fromX) {
+			dirX = 1;
+		} 
+		else if (toX < fromX) {
+			dirX = -1;
+		}
+		
+		var dirY : int = 0;
+		if (toY > fromY) {
+			dirY = 1;
+		} 
+		else if (toY < fromY) {
+			dirY = -1;
+		}
+		
+		for (; canAttack && difX >= 0; difX--) {
+			xIndex = xIndex + difX;
+			yIndex = yIndex + difY;
+			
+			canAttack = piece.movable(xIndexOld, yIndexOld, xIndex, yIndex, board, playerAction);
+			xIndexOld = xIndex;
+			yIndexOld = yIndex;
+		}
+	}
+	else {
+		canAttack = piece.movable(fromX, fromY, toX, toY, board, playerAction);
+	}
+	
+	if (!canAttack) {
+		board.setPiece(fromX, fromY, piece);
+	}
+	else {
+		piece.setHasMoved(true);
+	}
+	
+	return canAttack;
 }
