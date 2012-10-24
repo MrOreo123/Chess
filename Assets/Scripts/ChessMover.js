@@ -42,15 +42,6 @@ function canMove(fromX : int, fromY : int, toX : int, toY : int, board : ChessBo
  If the current player is checked or mated, invalidate the move
  If all three conditions above return true, return true and let the move pass
  */
- 
-function checkedWhiteKing(board : ChessBoard, x : int, y : int) {
-	// TODO implement
-	return false;
-}
-
-function checkedBlackKing(board : ChessBoard, x : int, y : int) {
-	return false;
-}
 
 function matedWhiteKing(board : ChessBoard){
 	return false;
@@ -76,6 +67,16 @@ function canAttack(fromX : int, fromY : int, toX : int, toY : int, board : Chess
 	
 	var canAttack : boolean = true;
 	if (difX == 0 && difY != 0) {
+		if (piece.getName() == "pawn") {
+			if (difY > 1 && piece.hasMoved()) {
+				Debug.Log("-- -- Pawns cannot move forward more that one piece more than once");
+				return false;
+			}
+			else if (difY > 2 && !piece.hasMoved()) {
+				Debug.Log("-- -- Pawns cannot move forward more than two pieces");
+				return false;
+			}
+		}
 		if (toY > fromY) {
 			for ( ; canAttack && yIndex <= toY ; yIndex++) {
 				canAttack = piece.movable(xIndexOld, yIndexOld, xIndex, yIndex, board, playerAction);
@@ -108,6 +109,14 @@ function canAttack(fromX : int, fromY : int, toX : int, toY : int, board : Chess
 		}
 	}
 	else if (difX == difY) {
+		
+		if (piece.getName() == "pawn") {
+			if (difY > 1 ) {
+				Debug.Log("-- -- Pawns cannot move diagonally more than one space");
+				return false;
+			}
+		}
+		
 		var dirX : int = 0;
 		if (toX > fromX) {
 			dirX = 1;
@@ -134,11 +143,15 @@ function canAttack(fromX : int, fromY : int, toX : int, toY : int, board : Chess
 		}
 	}
 	else {
-		canAttack = piece.movable(fromX, fromY, toX, toY, board, playerAction);
+		if (piece.getName() == "knight") {
+			canAttack = piece.movable(fromX, fromY, toX, toY, board, playerAction);
+		} else {
+			canAttack = false;
+		}
 	}
 	
 	if (!canAttack) {
-		board.setPiece(fromX, fromY, piece);
+		board.setPosition(fromX, fromY, piece);
 	}
 	else {
 		piece.setHasMoved(true);

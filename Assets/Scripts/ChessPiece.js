@@ -12,7 +12,7 @@ class ChessPiece {
 	
 	private var name : String;
 	
-	private var hasMoved : boolean = false;
+	private var alreadyMoved : boolean = false;
 	
 	public function ChessPiece(chessColor : int, chessPieceName : String) {
 		Debug.Log("Creating " + ((chessColor == 0) ? "White " : "Black ") + chessPieceName);
@@ -50,11 +50,20 @@ class ChessPiece {
 	}
 	
 	public function hasMoved() {
-		return hasMoved;
+		return alreadyMoved;
 	}
 	
 	public function setHasMoved(moved : boolean) {
-		hasMoved = moved;
+		alreadyMoved = moved;
+	}
+	
+	function checkedWhiteKing(board : ChessBoard) {
+		// TODO implement
+		return false;
+	}
+	
+	function checkedBlackKing(board : ChessBoard) {
+		return false;
 	}
 	
 	/**
@@ -75,16 +84,75 @@ class ChessPiece {
 
 class Pawn extends ChessPiece {
 	
-	private var moved : boolean = false;
-	
 	public function Pawn(chessColor : int) {
 		super(chessColor, "pawn");
-		moved = false;
 	}
 	
 	public function movable(fromX : int, fromY : int, toX : int, toY : int, board : ChessBoard, playerAction : boolean) {
-		if (!(super.movable(fromX, fromY, toX, toY, board))) {
+		if (!(super.movable(fromX, fromY, toX, toY, board, playerAction))) {
 			return false;
+		}
+		
+		var yDirection : int = toY - fromY;
+		var xDirection : int = toX - fromX;
+		
+		 // white
+		if (playerAction && yDirection < 0) {
+			Debug.Log(toString() + " can not move backwards");
+			return false;
+		}
+		// black pieces
+		else if (!playerAction && yDirection > 0) {
+			Debug.Log(toString() + " can not move backwards");
+			return false;
+		}
+		
+		if (Mathf.Abs(yDirection) < 1){
+			Debug.Log(toString() + " must always move forward by atleast one square");
+			return false;
+		}
+		
+		var target : ChessPiece = board.getPiece(toX, toY);
+		if (playerAction && target.getColor() == ChessPiece.WHITE) {
+			Debug.Log(toString() + " can not move over a piece of the same color");
+			return false;
+		}
+		else if (!playerAction && target.getColor() == ChessPiece.BLACK) {
+			Debug.Log(toString() + " can not move over a piece of the same color");
+			return false;
+		}
+		
+		if (xDirection > 1 || xDirection < -1) {
+			Debug.Log(toString() + " can not move left or right more than one space");
+			return false;
+		}
+		else if (Mathf.Abs(xDirection) == 1) {
+			if (playerAction && target.getColor() != ChessPiece.BLACK) {
+				Debug.Log(toString() + " can not move left or right without killing something");
+				return false;	
+			}
+			else if (!playerAction && target.getColor() != ChessPiece.WHITE) {
+				Debug.Log(toString() + " can not move left or right without killing something");
+				return false;
+			}
+		}
+		else if (xDirection == 0 && Mathf.Abs(yDirection) > 0) {
+			if (target.getColor() != ChessPiece.EMPTY) {
+				Debug.Log(toString() + " can not move forward into a space that is already occupied");
+				return false;	
+			}
+		}
+		
+		// update the state of the board
+		board.move(fromX, fromY, toX, toY);
+		
+		if (playerAction && checkedWhiteKing(board)) {
+			Debug.Log(toString() + " can not move so that board would be in check");
+			return false;	
+		}
+		else if (!playerAction && checkedBlackKing(board)) {
+			Debug.Log(toString() + " can not move so that board would be in check");
+			return false;	
 		}
 		
 		Debug.Log(getName() + " move passed all validations");
@@ -107,20 +175,15 @@ class Bishop extends ChessPiece {
 }
 
 class Rook extends ChessPiece {
-	
-	private var moved : boolean = false;
-	
 	public function Rook(chessColor : int) {
 		super(chessColor, "rook");
-		moved = false;
 	}
 	
 	public function movable(fromX : int, fromY : int, toX : int, toY : int, board : ChessBoard, playerAction : boolean) {
-		if (!super.movable(fromX, fromY, toX, toY, board)) {
+		if (!super.movable(fromX, fromY, toX, toY, board, playerAction)) {
 			return false;
 		}
 		
-		moved = true;
 		Debug.Log(getName() + " move passed all validations");
 		return true;
 	}
@@ -133,7 +196,7 @@ class Queen extends ChessPiece {
 	}
 	
 	public function movable(fromX : int, fromY : int, toX : int, toY : int, board : ChessBoard, playerAction : boolean) {
-		if (!super.movable(fromX, fromY, toX, toY, board)) {
+		if (!super.movable(fromX, fromY, toX, toY, board, playerAction)) {
 			return false;
 		}
 		
@@ -146,19 +209,15 @@ class Queen extends ChessPiece {
 
 class King extends ChessPiece {
 	
-	private var moved : boolean = false;
-	
 	public function King(chessColor : int) {
 		super(chessColor, "king");
-		moved = false;
 	}
 	
 	public function movable(fromX : int, fromY : int, toX : int, toY : int, board : ChessBoard, playerAction : boolean) {
-		if (!super.movable(fromX, fromY, toX, toY, board)) {
+		if (!super.movable(fromX, fromY, toX, toY, board, playerAction)) {
 			return false;
 		}
 		
-		moved = true;
 		Debug.Log(getName() + " move passed all validations");
 		return true;
 	}
@@ -178,7 +237,7 @@ class Knight extends ChessPiece {
 	 * Function to determine if the knight piece can move the specific location
 	 */
 	public function movable(fromX : int, fromY : int, toX : int, toY : int, board : ChessBoard, playerAction : boolean) {
-		if (!super.movable(fromX, fromY, toX, toY, board)) {
+		if (!super.movable(fromX, fromY, toX, toY, board, playerAction)) {
 			return false;
 		}
 		
@@ -194,7 +253,7 @@ class Empty extends ChessPiece {
 	}
 	
 	public function movable(fromX : int, fromY : int, toX : int, toY : int, board : ChessBoard, playerAction : boolean) {
-		super(fromX, fromY, toX, toY, board);
+		super(fromX, fromY, toX, toY, board, playerAction);
 		
 		Debug.Log("Empty pieces cannot move");
 		return false;
