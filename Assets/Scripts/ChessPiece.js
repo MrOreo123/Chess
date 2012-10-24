@@ -14,6 +14,8 @@ class ChessPiece {
 	
 	private var alreadyMoved : boolean = false;
 	
+	private var killedSomething : boolean = false;
+	
 	public function ChessPiece(chessColor : int, chessPieceName : String) {
 		Debug.Log("Creating " + ((chessColor == 0) ? "White " : "Black ") + chessPieceName);
 		color = chessColor;
@@ -57,6 +59,14 @@ class ChessPiece {
 		alreadyMoved = moved;
 	}
 	
+	public function hasKilledSomething() {
+		return killedSomething;
+	}
+	
+	public function setKilledSomething(flag : boolean) {
+		killedSomething = flag;
+	}
+	
 	function checkedWhiteKing(board : ChessBoard) {
 		// TODO implement
 		return false;
@@ -92,6 +102,9 @@ class Pawn extends ChessPiece {
 		if (!(super.movable(fromX, fromY, toX, toY, board, playerAction))) {
 			return false;
 		}
+		
+		var piece : ChessPiece = board.getPiece(fromX, fromY);
+		var targetPiece : ChessPiece = board.getPiece(toX, toY);
 		
 		var yDirection : int = toY - fromY;
 		var xDirection : int = toX - fromX;
@@ -135,6 +148,7 @@ class Pawn extends ChessPiece {
 				Debug.Log(toString() + " can not move left or right without killing something");
 				return false;
 			}
+			piece.setKilledSomething(true);
 		}
 		else if (xDirection == 0 && Mathf.Abs(yDirection) > 0) {
 			if (target.getColor() != ChessPiece.EMPTY) {
@@ -169,6 +183,48 @@ class Bishop extends ChessPiece {
 	
 	public function movable(fromX : int, fromY : int, toX : int, toY : int, board : ChessBoard, playerAction : boolean) {
 		
+		if (!(super.movable(fromX, fromY, toX, toY, board, playerAction))) {
+			return false;
+		}
+		
+		var piece : ChessPiece = board.getPiece(fromX, fromY);
+		var targetPiece : ChessPiece = board.getPiece(toX, toY);
+		
+		var yDif : int = Mathf.Abs(toY - fromY);
+		var xDif : int = Mathf.Abs(toX - fromX);
+		
+		if (yDif != xDif && yDif < 1) {
+			Debug.Log(toString() + " must move diagonally");
+			return false;	
+		}
+		
+		if (playerAction && targetPiece.getColor() == ChessPiece.WHITE) {
+			Debug.Log(toString() + " cannot collide with a piece of the same color");
+			return false;	
+		}
+		else if (!playerAction && targetPiece.getColor() == ChessPiece.BLACK) {
+			Debug.Log(toString() + " cannot collide with a piece of the same color");
+			return false;	
+		}
+		
+		if ((playerAction && targetPiece.getColor() == ChessPiece.BLACK) ||
+			(!playerAction && targetPiece.getColor() == ChessPiece.WHITE)) {
+			piece.setKilledSomething(true);
+		}
+		
+		// update the state of the board
+		board.move(fromX, fromY, toX, toY);
+		
+		if (playerAction && checkedWhiteKing(board)) {
+			Debug.Log(toString() + " can not move so that board would be in check");
+			return false;	
+		}
+		else if (!playerAction && checkedBlackKing(board)) {
+			Debug.Log(toString() + " can not move so that board would be in check");
+			return false;	
+		}
+		
+		Debug.Log(getName() + " move passed all validations");
 		return true;
 	}
 
@@ -184,7 +240,45 @@ class Rook extends ChessPiece {
 			return false;
 		}
 		
+		var piece : ChessPiece = board.getPiece(fromX, fromY);
+		var targetPiece : ChessPiece = board.getPiece(toX, toY);
+		
+		var yDif : int = Mathf.Abs(toY - fromY);
+		var xDif : int = Mathf.Abs(toX - fromX);
+		
+		if (!((yDif == 0 && xDif != 0) || (yDif != 0 && xDif == 0))){
+			Debug.Log(toString() + " cannot move in two directions");
+			return false;	
+		}
+		
+		if (playerAction && targetPiece.getColor() == ChessPiece.WHITE) {
+			Debug.Log(toString() + " cannot collide with a piece of the same color");
+			return false;	
+		}
+		else if (!playerAction && targetPiece.getColor() == ChessPiece.BLACK) {
+			Debug.Log(toString() + " cannot collide with a piece of the same color");
+			return false;	
+		}
+		
+		if ((playerAction && targetPiece.getColor() == ChessPiece.BLACK) ||
+			(!playerAction && targetPiece.getColor() == ChessPiece.WHITE)) {
+			piece.setKilledSomething(true);
+		}
+		
+		// update the state of the board
+		board.move(fromX, fromY, toX, toY);
+		
+		if (playerAction && checkedWhiteKing(board)) {
+			Debug.Log(toString() + " can not move so that board would be in check");
+			return false;	
+		}
+		else if (!playerAction && checkedBlackKing(board)) {
+			Debug.Log(toString() + " can not move so that board would be in check");
+			return false;	
+		}
+		
 		Debug.Log(getName() + " move passed all validations");
+		
 		return true;
 	}
 }
